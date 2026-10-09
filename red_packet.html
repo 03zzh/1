@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>🧧 拆红包</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#2a0808,#7a1418 55%,#c0292e);min-height:100vh;color:#3a1010;overflow-x:hidden;}
+  .wrap{max-width:420px;margin:0 auto;padding:0 0 40px;}
+  header{text-align:center;padding:38px 20px 12px;color:#fff;}
+  header .e{font-size:46px;display:inline-block;animation:floaty 2.4s ease-in-out infinite;}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+  header h1{font-size:26px;letter-spacing:2px;text-shadow:0 2px 6px rgba(0,0,0,.35);}
+  header p{font-size:12.5px;opacity:.85;margin-top:6px;line-height:1.7;}
+
+  .card{background:#fffdf8;border-radius:20px;margin:14px 14px;padding:22px 20px;
+    box-shadow:0 12px 30px rgba(0,0,0,.28);}
+  .card h2{font-size:15px;color:#b31f24;margin-bottom:14px;}
+
+  .field{margin-bottom:14px;}
+  .field label{font-size:12.5px;color:#8a4b4b;font-weight:600;display:block;margin-bottom:6px;}
+  .field input{width:100%;border:2px solid #f0d9d9;background:#fff;border-radius:12px;
+    padding:12px 14px;font-size:18px;font-weight:700;color:#3a1010;outline:none;}
+  .field input:focus{border-color:#ff5c5c;background:#fff7f7;}
+  .preset{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}
+  .preset button{flex:1;min-width:60px;border:1.5px solid #f0d0d0;background:#fff;color:#c44;
+    border-radius:20px;padding:7px 0;font-size:12px;font-weight:600;cursor:pointer;}
+  .preset button:hover{background:#e33b3b;color:#fff;border-color:#e33b3b;}
+  .btns{display:flex;gap:10px;}
+  .btn{flex:1;border:none;border-radius:14px;padding:14px 0;font-size:16px;font-weight:700;
+    cursor:pointer;color:#fff;box-shadow:0 6px 0 #b31f24;letter-spacing:1px;}
+  .btn:active{transform:translateY(3px);box-shadow:0 3px 0 #b31f24;}
+  .btn-primary{background:linear-gradient(135deg,#ff5c5c,#e33b3b);}
+  .btn-ghost{background:#f0d9d9;color:#b31f24;box-shadow:0 6px 0 #d8b8b8;}
+  .btn-ghost:active{box-shadow:0 3px 0 #d8b8b8;}
+  .tip{font-size:11px;color:#b09090;margin-top:5px;line-height:1.6;}
+  .link-box{margin-top:14px;background:#fff7f7;border:1.5px dashed #f0c0c0;border-radius:12px;padding:12px;display:none;}
+  .link-box.show{display:block;}
+  .link-box .lb{font-size:12px;color:#8a4b4b;margin-bottom:6px;}
+  .link-box .lc{display:flex;gap:6px;}
+  .link-box input{flex:1;border:1px solid #f0d0d0;border-radius:8px;padding:8px 10px;font-size:12px;background:#fff;}
+  .link-box button{border:none;background:#e33b3b;color:#fff;border-radius:8px;padding:0 12px;font-size:12.5px;font-weight:600;cursor:pointer;}
+
+  /* 抢红包页 */
+  .grab{display:none;text-align:center;padding:20px 10px 10px;}
+  .grab.show{display:block;}
+  .packet{width:220px;height:280px;margin:10px auto 20px;position:relative;cursor:pointer;
+    transform:scale(.7);opacity:0;transition:transform .4s cubic-bezier(.2,1.5,.4.1),opacity .3s;}
+  .packet.show{transform:scale(1);opacity:1;}
+  .packet .lid{position:absolute;top:0;left:0;right:0;height:86px;
+    background:linear-gradient(160deg,#ff8585,#e33b3b);border-radius:110px 110px 8px 8px;z-index:2;
+    transform-origin:bottom center;transition:transform .5s ease;box-shadow:0 -4px 0 rgba(255,255,255,.3) inset;}
+  .packet .lid::after{content:"";position:absolute;bottom:-13px;left:50%;transform:translateX(-50%);
+    width:110px;height:26px;background:#ffd54a;border-radius:50%;box-shadow:0 0 0 4px #fff inset;}
+  .packet .body{position:absolute;top:66px;left:0;right:0;bottom:0;
+    background:linear-gradient(170deg,#e33b3b,#b31f24);border-radius:12px;z-index:1;
+    display:flex;flex-direction:column;align-items:center;padding-top:56px;}
+  .packet .body .say{color:#ffd54a;font-size:14px;letter-spacing:1px;}
+  .packet .body .tap{color:#fff;font-size:12px;margin-top:86px;opacity:.85;animation:blink 1.2s infinite;}
+  @keyframes blink{50%{opacity:.2}}
+  .packet.open .lid{transform:rotateX(160deg);}
+  .packet .result{position:absolute;top:132px;left:0;right:0;text-align:center;color:#fff;z-index:3;opacity:0;transition:opacity .3s .2s;}
+  .packet.open .result{opacity:1;}
+  .packet .result .v{font-size:44px;font-weight:800;color:#ffe98a;}
+  .packet .result .v small{font-size:16px;}
+  .packet .result .l{font-size:12.5px;color:#ffd;margin-top:6px;}
+  .info{color:#fff;font-size:13px;line-height:1.9;}
+  .info b{color:#ffd54a;font-size:16px;}
+  .share-tip{background:rgba(255,255,255,.12);border-radius:12px;padding:12px;margin:14px 0;color:#fff;font-size:12.5px;line-height:1.8;}
+  .share-tip code{background:rgba(0,0,0,.25);padding:2px 6px;border-radius:5px;}
+
+  .rank{background:#fffdf8;border-radius:20px;margin:14px;padding:20px;box-shadow:0 12px 30px rgba(0,0,0,.28);display:none;}
+  .rank.show{display:block;}
+  .rank h3{font-size:15px;color:#b31f24;margin-bottom:12px;}
+  .row{display:flex;align-items:center;padding:9px 6px;border-bottom:1px dashed #f0dcdc;font-size:13.5px;}
+  .row:last-child{border-bottom:none;}
+  .row .no{width:26px;font-weight:800;color:#c99;}
+  .row.g1 .no{color:#e3a400;font-size:16px;}
+  .row.g2 .no{color:#9a9a9a;font-size:15px;}
+  .row.g3 .no{color:#b87333;font-size:15px;}
+  .row .ava{font-size:20px;margin-right:8px;}
+  .row .nm{flex:1;font-weight:600;}
+  .row .am{font-weight:800;color:#e33b3b;}
+  .row.crown .am::after{content:"👑";margin-left:4px;}
+
+  footer{text-align:center;color:rgba(255,255,255,.5);font-size:11px;margin-top:22px;padding:0 20px;line-height:1.7;}
+
+  @media(max-width:360px){.wrap{max-width:100%;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="e">🧧</span>
+    <h1>数字红包</h1>
+    <p>过过瘾版 · 纯数字，图个乐<br>塞好红包 → 复制链接 → 发到群里 → 大家一起抢</p>
+  </header>
+
+  <!-- 发红包 -->
+  <div class="card" id="sendCard">
+    <h2>🎁 塞一个红包</h2>
+    <div class="field">
+      <label>红包总金额（元）</label>
+      <input id="total" type="number" inputmode="decimal" placeholder="0.00" min="0.01" step="0.01">
+      <div class="preset">
+        <button data-v="8.88">8.88</button>
+        <button data-v="18.88">18.88</button>
+        <button data-v="66.66">66.66</button>
+        <button data-v="88.88">88.88</button>
+        <button data-v="100">100</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>红包个数</label>
+      <input id="count" type="number" inputmode="numeric" value="5" min="1" max="100">
+      <div class="tip">每人限抢一次，采用「二倍均值法」随机分配，越往后手气越刺激。</div>
+    </div>
+    <div class="btns">
+      <button class="btn btn-primary" id="sendBtn">塞钱进红包</button>
+      <button class="btn btn-ghost" id="randBtn">随机玩法</button>
+    </div>
+    <div class="link-box" id="linkBox">
+      <div class="lb">✅ 红包已备好！复制下面链接，发到微信群里：</div>
+      <div class="lc">
+        <input id="shareLink" readonly>
+        <button id="copyBtn">复制</button>
+      </div>
+      <div class="tip" style="margin-top:8px">链接就是抢红包入口，群友点开就能拆，结果实时同步。</div>
+    </div>
+  </div>
+
+  <!-- 拆红包 -->
+  <div class="grab" id="grabBox">
+    <div class="packet" id="packet">
+      <div class="lid"></div>
+      <div class="body">
+        <div class="say" id="gSay">恭喜发财 大吉大利</div>
+        <div class="tap">点击拆开红包</div>
+      </div>
+      <div class="result">
+        <div class="v" id="resAmt">0.00<small> 元</small></div>
+        <div class="l" id="resLab"></div>
+      </div>
+    </div>
+    <div class="info" id="gInfo"></div>
+    <div class="share-tip">
+      💡 把这个页面链接分享给朋友，大家一起抢，<br>手气实时同步，谁是 <b style="color:#ffd54a">👑最佳</b> 一目了然！
+    </div>
+  </div>
+
+  <!-- 排行榜 -->
+  <div class="rank" id="rankBox">
+    <h3>🏆 手气排行榜</h3>
+    <div id="rankList"></div>
+  </div>
+
+  <footer>
+    仅供娱乐，红包金额仅为数字，不产生任何真实资金往来。<br>
+    后端：red_packet_server.py · 前端：red_packet.html
+  </footer>
+</div>
+
+<script>
+const API = '';  // ← 改成你的 Vercel 后端地址，如 https://你的项目名.vercel.app
+const myId = localStorage.getItem('rpid') || (localStorage.setItem('rpid', 'u'+Math.random().toString(36).slice(2,10)), localStorage.getItem('rpid'));
+const myNick = localStorage.getItem('rpnick') || (localStorage.setItem('rpnick', '朋友'+Math.random().toString(36).slice(2,5)), localStorage.getItem('rpnick'));
+const myAva = localStorage.getItem('rpava') || (localStorage.setItem('rpava', ['🐶','🐱','🦊','🐼','🦁','🐸','🐵','🐧'][Math.floor(Math.random()*8)]), localStorage.getItem('rpava'));
+
+function api(path, opt={}){ return fetch(API+path, opt).then(r=>r.json()); }
+
+/* ---------- 发红包 ---------- */
+$('sendBtn').onclick = async ()=>{
+  const t=parseFloat($('total').value), c=parseInt($('count').value);
+  if(!(t>0)){ toast('请输入红包总金额'); return; }
+  if(!(c>=1)){ toast('红包个数至少为 1'); return; }
+  if(t/c<0.01){ toast('单个红包不能小于 0.01 元'); return; }
+  const r = await api('/api/create', {method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({total:t, count:c})});
+  if(!r.ok){ toast(r.msg); return; }
+  // 静态托管页面用 hash 路由：https://xxx.github.io/red_packet.html#/open/xxxx
+  const link = location.origin + location.pathname + '#/open/' + r.packet_id;
+  $('shareLink').value = link;
+  $('linkBox').classList.add('show');
+  toast('红包已备好，快复制链接发出去！');
+};
+$('copyBtn').onclick = ()=>{
+  $('shareLink').select();
+  document.execCommand('copy');
+  toast('链接已复制，去群里粘贴吧 🧧');
+};
+$('randBtn').onclick = ()=>{
+  const f=[6.66,8.88,9.99,13.14,18.88,52,66.66,77.77,88.88,99.99,131.4,188,520,888];
+  $('total').value = f[Math.floor(Math.random()*f.length)];
+  $('count').value = Math.floor(Math.random()*8)+3;
+};
+document.querySelectorAll('.preset button').forEach(b=>b.onclick=()=>$('total').value=b.dataset.v);
+
+/* ---------- 判断页面角色：发红包 or 拆红包 ----------
+   用 hash 路由（#/open/xxxx），这样 GitHub Pages 等纯静态托管也能正常工作，
+   不需要后端做 URL rewrite。
+*/
+const m = location.hash.match(/#\/open\/([^\/]+)/);
+if(m){ enterGrab(m[1]); }
+
+async function enterGrab(pid){
+  $('sendCard').style.display='none';
+  $('grabBox').classList.add('show');
+  const info = await api('/api/packet/'+pid);
+  if(!info.ok){ $('gInfo').innerHTML = '<p style="color:#fff">'+info.msg+'</p>'; return; }
+  $('gInfo').innerHTML = `红包共 <b>${info.total.toFixed(2)}</b> 元 / ${info.count} 份<br>已有 <b>${info.grabbed_count}</b> 人拆开，剩余 <b>${info.remain}</b> 份`;
+  refreshRank(pid);
+
+  const pk=$('packet'), resAmt=$('resAmt'), resLab=$('resLab');
+  pk.classList.remove('show','open');
+  if(info.remain===0){ resLab.textContent='红包已抢光'; pk.classList.add('show'); renderDone(pid); return; }
+  requestAnimationFrame(()=>setTimeout(()=>pk.classList.add('show'),30));
+
+  pk.onclick = async ()=>{
+    const r = await api('/api/grab/'+pid, {method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({user_id:myId, nick:myNick, ava:myAva})});
+    if(!r.ok && !r.already){ toast(r.msg); if(r.is_done) renderDone(pid); return; }
+    pk.classList.add('open');
+    fireConfetti(pk);
+    resAmt.innerHTML = r.amount.toFixed(2)+'<small> 元</small>';
+    resLab.textContent = r.already ? '你之前已经抢过啦' : '手气不错！';
+    setTimeout(()=>{ renderDone(pid); }, 1400);
+  };
+}
+
+async function renderDone(pid){
+  const r = await api('/api/rank/'+pid);
+  $('gInfo').innerHTML = `红包 <b style="color:#ffd54a">已抢光</b>！共 ${r.count} 人参与<br>手气最佳 👑：${r.grabbed[0]?r.grabbed[0].nick+'（'+r.grabbed[0].amount.toFixed(2)+'元）':'-'}（你也是 👑：${r.grabbed[0]?r.grabbed[0].nick+'（'+r.grabbed[0].amount.toFixed(2)+'元）':'-'}）`;
+  $('gInfo').innerHTML = `红包 <b style="color:#ffd54a">已抢光</b>！共 ${r.count} 人参与<br>手气最佳 👑：${r.grabbed[0]?r.grabbed[0].nick+'（'+r.grabbed[0].amount.toFixed(2)+'元）':'-'}`;
+  const list = $('rankList');
+  list.innerHTML = r.grabbed.map((g,i)=>
+    `<div class="row g${i+1}${i===0?' crown':''}">
+       <span class="no">${i+1}</span><span class="ava">${g.ava}</span>
+       <span class="nm">${g.nick}${g.user_id===myId?'（我）':''}</span>
+       <span class="am">${g.amount.toFixed(2)}元</span></div>`).join('')
+    + (r.remain>0 ? `<div class="row"><span class="no">…</span><span class="nm" style="color:#b09090">还差 ${r.remain} 人抢完</span></div>` : '');
+  $('rankBox').classList.add('show');
+  // 轮询更新
+  if(r.remain>0) setTimeout(()=>renderDone(pid), 3000);
+}
+
+async function refreshRank(pid){
+  const r = await api('/api/rank/'+pid);
+  if(r.grabbed.length){
+    $('rankBox').classList.add('show');
+    const list=$('rankList');
+    list.innerHTML = r.grabbed.slice(0,5).map((g,i)=>
+      `<div class="row g${i+1}${i===0?' crown':''}"><span class="no">${i+1}</span><span class="ava">${g.ava}</span>
+       <span class="nm">${g.nick}${g.user_id===myId?'（我）':''}</span><span class="am">${g.amount.toFixed(2)}元</span></div>`).join('')
+      + (r.remain>0?`<div class="row"><span class="no">…</span><span class="nm" style="color:#b09090">还差 ${r.remain} 人抢完</span></div>`:'');
+    if(r.remain>0) setTimeout(()=>refreshRank(pid),3000);
+  }else{
+    setTimeout(()=>refreshRank(pid),2000);
+  }
+}
+
+function fireConfetti(parent){
+  const colors=['#ffd54a','#ff6b6b','#ff9aa2','#a0e7e5','#b5ead7','#fff'];
+  for(let i=0;i<26;i++){
+    const c=document.createElement('div');
+    c.style.cssText=`position:absolute;width:10px;height:14px;top:-20px;left:${Math.random()*80+10}%;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()<.5?'50%':'2px'};opacity:.9;transform:rotate(${Math.random()*360}deg);transition:top ${1+Math.random()*.8}s linear,left ${1+Math.random()*.8}s ease-out,opacity .8s;`;
+    parent.appendChild(c);
+    requestAnimationFrame(()=>setTimeout(()=>{c.style.top=Math.random()*40+70+'%';c.style.left=`${parseFloat(c.style.left)-Math.random()*40+20}%`;c.style.opacity=0;},30));
+    setTimeout(()=>c.remove(),2000);
+  }
+}
+
+let tt;
+function toast(msg){
+  let t=document.querySelector('.toast');
+  if(!t){t=document.createElement('div');t.className='toast';t.style.cssText='position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:rgba(0,0,0,.8);color:#fff;padding:12px 22px;border-radius:12px;z-index:99;font-size:14px;max-width:80%;text-align:center;line-height:1.5;';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity=1;clearTimeout(tt);tt=setTimeout(()=>t.style.opacity=0,1800);
+}
+</script>
+</body>
+</html>
