@@ -163,7 +163,7 @@
 </div>
 
 <script>
-const API = '';  // ← 改成你的 Vercel 后端地址，如 https://你的项目名.vercel.app
+const API = 'https://red-packet-bice.vercel.app';  // ← 改成你的 Vercel 后端地址，如 https://你的项目名.vercel.app
 const myId = localStorage.getItem('rpid') || (localStorage.setItem('rpid', 'u'+Math.random().toString(36).slice(2,10)), localStorage.getItem('rpid'));
 const myNick = localStorage.getItem('rpnick') || (localStorage.setItem('rpnick', '朋友'+Math.random().toString(36).slice(2,5)), localStorage.getItem('rpnick'));
 const myAva = localStorage.getItem('rpava') || (localStorage.setItem('rpava', ['🐶','🐱','🦊','🐼','🦁','🐸','🐵','🐧'][Math.floor(Math.random()*8)]), localStorage.getItem('rpava'));
